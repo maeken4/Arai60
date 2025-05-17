@@ -1,4 +1,4 @@
-// PRを受け修正
+#include<set>
 
 struct ListNode {
     int val;
@@ -9,15 +9,14 @@ struct ListNode {
 class Solution {
     public:
     bool hasCycle(ListNode* head) {
-        ListNode* fast = head;
-        ListNode* slow = head;
-
-        while(fast != nullptr && fast->next != nullptr) {
-            fast = fast->next->next;
-            slow = slow->next;
-            if(fast == slow) {
+        std::set<ListNode*> visited;
+        ListNode* now = head;
+        while(now != nullptr) {
+            if (visited.contains(now)) {
                 return true;
             }
+            visited.insert(now);
+            now = now->next;
         }
         return false;
     }

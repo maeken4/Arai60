@@ -9,16 +9,21 @@ struct ListNode {
 class Solution {
    public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        ListNode dummy(-1, nullptr);
+        ListNode dummy = ListNode(-1);
         ListNode* tail = &dummy;
         int carry = 0;
+
+        ListNode fake = ListNode(0);
         while (l1 || l2 || carry) {
-            int sum = (l1 ? l1->val : 0) + (l2 ? l2->val : 0) + carry;
-            carry = sum / 10;
-            tail->next = new ListNode(sum % 10, nullptr);
+            l1 = l1 ? l1 : &fake;
+            l2 = l2 ? l2 : &fake;
+            int total = l1->val + l2->val + carry;
+            carry = total / 10;
+            tail->next = new ListNode(total % 10);
+
             tail = tail->next;
-            l1 = l1 ? l1->next : nullptr;
-            l2 = l2 ? l2->next : nullptr;
+            l1 = l1->next;
+            l2 = l2->next;
         }
         return dummy.next;
     }

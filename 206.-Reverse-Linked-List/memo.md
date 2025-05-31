@@ -33,10 +33,23 @@ class Solution {
 ```
 
 # step2
-```cpp:step2.cpp
-#include <stack>
 
+```cpp:step2.cpp
 class Solution {
-    
-}
+   public:
+    ListNode* reverseList(ListNode* head) {
+        return reverseRecursively(head);
+    }
+   private:
+    // node以降のリストを逆順に繋ぎなおし、元々の最後尾を新たなheadとして返す
+    ListNode* reverseRecursively(ListNode* node) {
+        if (node == nullptr || node->next == nullptr) {
+            return node;
+        }
+        ListNode* head =  reverseRecursively(node->next);
+        node->next->next = node;
+        node->next = nullptr;
+        return head;
+    }
+};
 ```

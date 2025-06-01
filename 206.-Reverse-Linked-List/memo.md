@@ -153,3 +153,25 @@ public:
     }
 };
 ```
+
+再帰別解(https://github.com/maeken4/Arai60/pull/7/files/e30de22cd54e0c4dab8713af400534b11d6adb69#r2118170691)
+```cpp
+class Solution {
+   public:
+    ListNode* reverseList(ListNode* head) {
+        return reverse_and_append(head, nullptr);
+    }
+   private:
+    // [1,2,3], [4,5,6] -> [3,2,1,4,5,6]
+    // [], [4,5,6] -> [4,5,6s]
+    ListNode* reverse_and_append(ListNode* head1, ListNode* head2){
+        if (head1 == nullptr) {
+            return head2;
+        }
+        auto new_head1 = head1->next;
+        head1->next = head2;
+        return reverse_and_append(new_head1, head1);
+
+    }
+};
+```

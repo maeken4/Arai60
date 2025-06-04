@@ -7,10 +7,10 @@
 class KthLargest {
 public:
     KthLargest(int k, std::vector<int>& nums) {
-        this->threshold = k;
+        threshold = k;
         std::sort(nums.begin(), nums.end(), std::greater<int>());
         for (int i = 0; i < std::min(threshold, static_cast<int>(nums.size())); i++) {
-            this->pq.push(nums[i]);
+            pq.push(nums[i]);
         }
     }
     
@@ -36,6 +36,9 @@ public:
 
 
 # step2
+- 何はともかく突っ込んでheapがk個のままであるように調整するほうがシンプルに書けた。
+- ヒープの実装を知りたい気持ちになって[discordのコメント](https://discord.com/channels/1084280443945353267/1301559648922501182/1312819361312018516)あたりとかchatGPTで調べてみた。
+- だいたい、内部的にvectorとかを持っておいて、make_heapすることで配列をヒープ化して(ここはまた気になったときにちゃんと読む)、push_heapとかでheapの構造を保っておいて、キューのインターフェイスだけ持たせる的な感じっぽい。
 ```cpp:step2.cpp
 #include <queue>
 class KthLargest {
@@ -57,6 +60,41 @@ class KthLargest {
         pq.push(val);
         if(pq.size() > _k) {
             pq.pop();
+        }
+    }
+};
+```
+
+
+# step3
+- クラス変数名は末尾に`_`とあったので変更。[google style guide](https://google.github.io/styleguide/cppguide.html#Variable_Names)
+- 問題文の状況を考えval(int)をscoreに変更
+- k個入っていない状況でaddが呼ばれたら例外を投げたいがC++の例外をよく知らず…コメントで注意はするが、例外を使わないとすると成功のフラグを参照で受け渡すとかになりそう。
+```cpp
+#include <vector>
+#include <queue>
+
+class KthLargest {
+public:
+    KthLargest(int k, vector<int>& nums) {
+        k_ = k;
+        for (const auto& score : nums) {
+            add_and_trim(score);
+        }
+    }
+    // this method should be called after k elements were pushed.
+    int add(int score) {
+        add_and_trim(score);
+        return top5_queue_.top();
+    }
+private:
+    int k_;
+    std::priority_queue<int, std::vector<int>, std::greater<int>> top5_queue_;
+
+    void add_and_trim(int score) {
+        top5_queue_.push(score);
+        if (top5_queue_.size() > k_) {
+            top5_queue_.pop();
         }
     }
 };

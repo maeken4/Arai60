@@ -100,6 +100,7 @@ public:
 
 ## ryosuketcさんのコメント
 numsを走査し見つけた数をsetに入れていく。入れるまえに対応する数がすでに入っていればそこで終了できるため場合によっては早いし、最悪でもO(nlogn)で他の解法と変わらない
+- setを使った解法
 ```cpp
 #include <set>
 #include <vector>
@@ -118,6 +119,33 @@ class Solution {
                 two_indices = {int(it - nums.begin()), (*complement).second};
             } else {
                 seen_num_or_complement_with_index.insert(std::make_pair(*it, it - nums.begin()));
+            }
+        }
+
+        return two_indices;
+    }
+};
+
+```
+- ほかの人の解答を見直したところmapのほうがずっとすっきりかける
+```cpp
+#include <map>
+#include <vector>
+
+class Solution {
+public:
+    std::vector<int> twoSum(std::vector<int>& nums, int target) {
+        std::unordered_map<int, int> seen_num_to_index;
+        std::vector<int> two_indices;
+
+        for (int i = 0; i < nums.size(); ++i) {
+            auto complement = seen_num_to_index.find(target - nums[i]);
+            if (complement != seen_num_to_index.end()) {
+                two_indices = {i, complement->second};
+                break;
+            }
+            else {
+                seen_num_to_index[nums[i]] = i;
             }
         }
 

@@ -127,7 +127,7 @@ class Solution {
 };
 
 ```
-- ほかの人の解答を見直したところmapのほうがずっとすっきりかける
+- 解答を見直したところmapのほうがずっとすっきりかける
 ```cpp
 #include <map>
 #include <vector>

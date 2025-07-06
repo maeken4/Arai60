@@ -54,7 +54,8 @@ class Solution {
 };
 
 ```
-
+[hayashi-ayさんのPR](https://github.com/hayashi-ay/leetcode/pull/19/files?short_path=1182cc1#diff-1182cc11bee6cacd4b54d0a5619c78583d5bbcabbeca0eba95b5c016c6f811a0)
+[nittocoさんのPR](https://github.com/nittoco/leetcode/pull/13/files)
 - 各文字列に出現するアルファベットをカウントする方法。
 - 先の解法と違ってアルファベット以外を想定に入れると文字の種類だけのメモリを常に使用することになる。
 - unordered_mapをvector<int>に対して使うにはハッシュ関数を書かないといけないみたいなので、mapで書いた。

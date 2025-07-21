@@ -211,3 +211,24 @@ public:
 };
 
 ```
+
+# step3-2
+nodchipさんのコメントを踏まえて修正
+```cpp
+#include <iterator>
+#include <ranges>
+#include <set>
+#include <vector>
+
+class Solution {
+public:
+    std::vector<int> intersection(const std::vector<int>& nums1, const std::vector<int>& nums2) {
+        auto unique_nums1 = nums1 | std::ranges::to<std::set>();
+        auto unique_nums2 = nums2 | std::ranges::to<std::set>();
+        std::vector<int> result;
+        std::ranges::set_intersection(unique_nums1, unique_nums2, std::back_inserter(result));
+        return result;
+    }
+};
+
+```

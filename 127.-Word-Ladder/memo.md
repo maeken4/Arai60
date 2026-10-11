@@ -104,19 +104,7 @@ class Solution {
 
     編集距離の使い道を知らなかった。
 
-https://github.com/tarinaihitori/leetcode/pull/20
-
 https://github.com/docto-rin/leetcode/pull/19
-
-
-
-考えると単語の長さもチェックする必要がありそう。->一応問題文で保障されている
-文字列のビューを使う
-イテレーターを使う
-パターンを使う
-size() length()　文字列の場合使い分ける？
-beginwordとendwordの変な非対称はこういう解法があるからなのね
-
 
 ## step2-1
 パターンで引く方法
@@ -250,3 +238,56 @@ leetcode上では2-1のほうが2-2より3倍くらい遅い。
   1. 値を読み取る、比較する、距離を更新するなどもともとの目的
   2. その頂点から次に走査したい頂点をタスクキューに入れる
   3. キューから次の頂点を取り出し1に戻る
+
+
+# step3
+step2-2で3回練習。
+- `words`だとなんのことだかわからないので`unvisited`に変更。
+- queueに入れておくintについて、`dist`だと微妙(beginWordを始点としたときの距離+1なので)だったので、迷ったが`word_count`に変更。
+
+```cpp
+#include <queue>
+#include <unordered_set>
+
+
+class Solution {
+  public:
+    int ladderLength(std::string beginWord, std::string endWord, std::vector<std::string>& wordList) {
+        std::unordered_set<std::string> unvisited(wordList.begin(), wordList.end());
+        if (!unvisited.contains(endWord)) {
+            return 0;
+        }
+        // 問題の制約からは一応不要
+        unvisited.erase(beginWord);
+
+        std::queue<std::pair<std::string, int>> frontier;
+        frontier.emplace(beginWord, 1);
+
+        while (!frontier.empty()) {
+            auto [word, word_count] = frontier.front();
+            frontier.pop();
+
+            if (word == endWord) {
+                return word_count;
+            }
+
+            for (int i = 0; i < word.length(); ++i) {
+                char original = word[i];
+
+                for (char c = 'a'; c <= 'z'; ++c) {
+                    if (c == original) {
+                        continue;
+                    }
+
+                    word[i] = c;
+                    if (unvisited.erase(word) != 0) {
+                        frontier.emplace(word, word_count + 1);
+                    }
+                    word[i] = original;
+                }
+            }
+        }
+        return 0;
+    }
+};
+```

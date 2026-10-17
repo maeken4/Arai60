@@ -17,7 +17,7 @@ public:
 - https://discord.com/channels/1084280443945353267/1227073733844406343/1236235351140339742
   > 二つの DFS は対応しておらず、上から配るのと下から上げてくるのの差があることは認識できますか?
   
-  step1の書き方だと探索の帰りに値を足している(下から上げる)が、2-1の書き方だと、行きに値を足している(上から配る)。2-2でstack,下から上げる、2-3で再帰、上から配るで実装してみた。
+  step1の書き方だと探索の帰りに値を足している(下から上げる=bottom-up)が、2-1の書き方だと、行きに値を足している(上から配る=top-down)。2-2でstack,下から上げる、2-3で再帰、上から配るで実装してみた。
 
 - https://github.com/Yuto729/leetcode/pull/26
   レベルごとに走査する方法もある。
@@ -26,7 +26,7 @@ public:
 
 stackで書き直すとヒープ領域にデータが置かれるのでより大きなデータを持つことができる。
 
-## step2-1 stackで書き直す
+## step2-1 stackで書き直す(top-down)
 
 ```cpp
 #include <stack>
@@ -59,59 +59,57 @@ public:
 };
 ```
 
-## step2-2 stackで値を下から上げる
-C++の初期化の文法がいつもこんがらがってわからなくなってしまう。
+## step2-2 stackでbottom-up
+liquoreさんの解答を写経。https://discord.com/channels/1084280443945353267/1227073733844406343/1236324993839792149
+
+C++の初期化の文法がいつもこんがらがってわからなくなってしまう。以下はC++20からのdesignated initializers（指示付き初期化子・指定初期化子）というらしい。
+
+step1のように再帰関数の戻り値で値を渡すと、下から値が決まっていくので必然的に下から上にあげていくようなコードになる。一方step2-1のようににスタックで書くと、自分がどこから呼び出されたかは情報として持たず、上から深さ情報を継承して(上から下に配って)コードが進行する。スタックで値を下から上にあげていくには、戻り値の受け渡しを明示的に管理する必要がある。
 
 
 ```cpp
+
 class Solution {
 public:
     int maxDepth(TreeNode* root) {
-        if (root == nullptr) {
-            return 0;
+       stack<StackFrame> stack_frames;
+       optional<int> result;
+       stack_frames.push(StackFrame{.node = root, .depth_output = result});
+
+       while (!stack_frames.empty()) {
+        auto& [node, depth_output, left_depth, right_depth] = stack_frames.top();
+
+        if (!node) {
+            depth_output = 0;
+            stack_frames.pop();
+            continue;
         }
 
-        std::stack<Frame> call_stack;
-        call_stack.push(Frame{.node = root, .left_length = 0, .right_length = 0});
-
-        int returned_depth = 0;
-        while (!call_stack.empty()) {
-            Frame& frame = call_stack.top();
-
-            if (frame.state == State::Enter) {
-                frame.state = State::LeftDone;
-                if (frame.node->left != nullptr) {
-                    call_stack.push(Frame{.node = node->left,})
-                }
-            }
-            else if (frame.state == State::LeftDone) {
-                frame.state = State::RightDone;
-                if (frame.node->right != nullptr) {
-                    call_stack.push()
-                }
-            }
-            else {  // RightDone
-
-            }
+        if (!left_depth.has_value()) {
+            stack_frames.push(StackFrame{.node = node->left, .depth_output = left_depth});
+            continue;
         }
+        if (!right_depth.has_value()) {
+            stack_frames.push(StackFrame{.node = node->right, .depth_output = right_depth});
+            continue;
+        }
+
+        depth_output = max(*left_depth, *right_depth) + 1;
+        stack_frames.pop();
+       }
+    return *result;
     }
 private:
-    enum class State {
-        Enter,  // これから左部分木を処理
-        LeftDone,  // これから右部分木を処理
-        RightDone  // 右部分木の処理が完了し自身の深さを確定する
-    };
-
-    struct Frame {
+    struct StackFrame {
         TreeNode* node;
-        State state = State:::Enter;
-        int left_length;
-        int right_length;
+        optional<int>& depth_output;
+        optional<int> left_depth;
+        optional<int> right_depth;
     };
 };
 ```
 
-## step2-3 再帰で上から配る
+## step2-3 再帰でtop-down
 自分で書いたもの
 ```cpp
 class Solution {
@@ -136,7 +134,7 @@ public:
 };
 ```
 
-max_depthに関する扱いがきれいでなくchatGPTに聞いた
+max_depthに関する扱いがきれいでなくchatGPTに聞いた.
 ```cpp
 class Solution {
 public:
@@ -150,6 +148,40 @@ public:
         };
 
         return traverse_node(root, 0);
+    }
+};
+```
+
+一つ目の方法だと、DFSの行きがけの経路で順次足し算が行われ、同時にグローバル変数である最大深さが更新される。二つ目の方法だと、行きがけに足し算は実行されていくが、最大値の更新は帰りがけに行われる。
+
+# step3
+step2-1の方法
+
+```
+
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        int max_depth = 0;
+        std::stack<std::pair<TreeNode*, int>> node_and_depth;
+        if (!root) {
+            return max_depth;
+        }
+        node_and_depth.emplace(root, 1);
+        while (!node_and_depth.empty()) {
+            auto [node, depth] = node_and_depth.top();
+            node_and_depth.pop();
+            max_depth = max(max_depth, depth);
+
+            if (node->left) {
+                node_and_depth.emplace(node->left, depth + 1);
+            }
+            if (node->right) {
+                node_and_depth.emplace(node->right, depth + 1);
+            }
+        }
+
+        return max_depth;
     }
 };
 ```
